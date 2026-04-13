@@ -1,0 +1,7 @@
+services:
+  mcp-server:
+    build: .
+    ports:
+      -  "6767:6767"
+    environment: 
+      - T212_CREDS=${T212_CREDS}
