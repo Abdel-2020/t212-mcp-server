@@ -1,0 +1,9 @@
+.secret
+.webui_secret_key
+.venv
+
+
+__pycache__/
+*.pyc
+
+docker_files/
