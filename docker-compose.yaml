@@ -2,6 +2,6 @@ services:
   mcp-server:
     build: .
     ports:
-      -  "6767:6767"
+      -  "42070:42070"
     environment: 
-      - T212_CREDS=${T212_CREDS}
+      T212_CREDS_DEMO: ${T212_CREDS_DEMO}

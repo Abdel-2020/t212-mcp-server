@@ -1,7 +1,7 @@
 .secret
 .webui_secret_key
 .venv
-
+.env
 __pycache__/
 *.pyc
 
