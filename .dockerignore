@@ -1,9 +1,23 @@
-.secret
-.webui_secret_key
-.venv
+# Git
+.git
+.gitignore
 
-
+# Python
 __pycache__/
-*.pyc
+*.py
+*$py.class
+.pytest_cache/
+.venv/
+.env
 
-docker_files/
+# uv-specific
+.uv/
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Mac/Windows system files
+.DS_Store
+Thumbs.db
