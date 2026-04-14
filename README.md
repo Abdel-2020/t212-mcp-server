@@ -10,9 +10,9 @@ A few things to note if you choose to run this. The **BASE_API_URL** with in mai
 
 ## T212 API Documentation and how to set up your access token
 
-[How To Get API KEY](https://helpcentre.trading212.com/hc/en-us/articles/14584770928157-Trading-212-API-key)
-[How To Generate Authentication Token](https://docs.trading212.com/api/section/authentication)
+- [How To Get API KEY](https://helpcentre.trading212.com/hc/en-us/articles/14584770928157-Trading-212-API-key)
+- [How To Generate Authentication Token](https://docs.trading212.com/api/section/authentication)
 ## How to set up environment variables
 
-[See this documentation](https://www.digitalocean.com/community/tutorials/how-to-read-and-set-environmental-and-shell-variables-on-linux)
+- [See this documentation](https://www.digitalocean.com/community/tutorials/how-to-read-and-set-environmental-and-shell-variables-on-linux)
 
