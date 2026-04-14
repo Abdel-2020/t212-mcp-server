@@ -1,8 +1,8 @@
-.secret
-.webui_secret_key
-.venv
-.env
-__pycache__/
-*.pyc
+src/.secret
+src/.webui_secret_key
+src/.venv
+src/.env
+src/__pycache__/
+src/*.pyc
 
 

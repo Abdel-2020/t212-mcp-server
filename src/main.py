@@ -170,6 +170,23 @@ async def place_limit_order(limitPrice: float, quantity: float, ticker: str, cou
     if not response:
         return "Mission Failed"
 
+@mcp.tool()
+async def cancel_pending_order(unique_id: int) -> dict[str, Any] | None:
+    """Attempts to cancel a pending order by its unique ID a successful response indicates
+       the cancellation request was accepted.
+
+        Args: 
+            unique_id: The unique identifier of the order you want to cancel.
+       """
+    url = f"{BASE_API_URL}equity/orders/limit"
+
+    response = await make_t212_del(url)
+    return response
+
+    if not response:
+        return "Mission Failed"
+
+
 
 
 
