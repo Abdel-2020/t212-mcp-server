@@ -144,9 +144,10 @@ async def get_open_positions(ticker: str, country_code: str) -> dict[str, Any] |
 
 
 @mcp.tool()
-async def get_all_pending_orders() -> list[dict[str, Any]] | None:
+async def get_all_pending_orders() -> list[dict[str, Any] | None:
     """Retrieves a list of all orders that are currently active.
-       Useful for monitoring the status of open positions"""
+       Useful for monitoring the status of open positions
+       Make sure to keep a note of the id as that can be used to cancel the order"""
     url = f"{BASE_API_URL}equity/orders"
     response = await make_t212_req(url)
     return response
