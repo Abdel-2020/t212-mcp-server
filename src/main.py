@@ -18,7 +18,7 @@ BASE_API_URL = 'https://demo.trading212.com/api/v0/'
 
 # Helper function to make requests to the T212 api
 async def make_t212_req(url: str) -> dict[str, Any] | None:
-    """Make a request to the trading212 API with error handling"""
+    """Make a get request to the trading212 API with error handling"""
 
     if not token:
         print("Error: Auth Token invalid or missing", file=sys.stderr)
@@ -36,8 +36,8 @@ async def make_t212_req(url: str) -> dict[str, Any] | None:
             return None
 
 
-async def make_t212_post(url: str, payload: [Any, Any]) -> dict[str, Any] | None:
-    """Make a request to the trading212 API with error handling"""
+async def make_t212_post(url: str, payload: [str, Any]) -> dict[str, Any] | None:
+    """Make a post request to the trading212 API with error handling"""
 
     if not token:
         print("Error: Auth Token invalid or missing", file=sys.stderr)
@@ -49,6 +49,24 @@ async def make_t212_post(url: str, payload: [Any, Any]) -> dict[str, Any] | None
     async with httpx.AsyncClient() as client: 
         try: 
             res = await client.post(url,json=payload, headers=headers, timeout=60.0)
+            res.raise_for_status()
+            return res.json()
+        except Exception:
+            return None
+
+async def make_t212_del(url: str) -> dict[str, Any] | None:
+    """Make a delete request to the trading212 API with error handling"""
+
+    if not token:
+        print("Error: Auth Token invalid or missing", file=sys.stderr)
+        # Throw an error
+    else:
+        headers = {'Authorization': f'Basic {token}'}
+
+
+    async with httpx.AsyncClient() as client: 
+        try: 
+            res = await client.delete(url,json=payload, headers=headers, timeout=60.0)
             res.raise_for_status()
             return res.json()
         except Exception:
@@ -137,7 +155,7 @@ async def get_all_pending_orders() -> dict[str, Any] | None:
         return "Mission Failed"
 
 @mcp.tool()
-async def place_limit_order(limitPrice: float, quantity: float, ticker: str, country_code: str, timeValidity: str) -> dict[str, Any] | None:
+async def place_limit_order(limitPrice: float, quantity: float, ticker: str, country_code: str | None, timeValidity: str) -> dict[str, Any] | None:
     """Create a new limit order which executes at a specified price or better.
        
        To place a sell order, use a negative 'quantity' value. The order will fill at the 'limitPrice' or higher 
@@ -146,9 +164,9 @@ async def place_limit_order(limitPrice: float, quantity: float, ticker: str, cou
        Make sure to add "US" if it's an american company.
 
         Args: 
-            limitPrice:To place a buy order, use a postive 'quantity' value. The order will fill at the 'limitPrice' or lower.
+            limitPrice: To place a limit order, use a postive 'quantity' value. The order will fill at the 'limitPrice' or lower.
             quantity: The amount of shares to buy, can be fractional (float)
-            ticker: the ticker symbol for the position you are tryng to fetch.
+            ticker: the ticker symbol for the stock you with to place a limit order for.
             country_code: two letter symbol "US" for American stocks. Currently other stocks do not require a country code.
             timeValidity: Specifies how long the order will remain active. 
                     Set to "DAY" for the order to expire if not executed by midnight. 
@@ -178,7 +196,7 @@ async def cancel_pending_order(unique_id: int) -> dict[str, Any] | None:
         Args: 
             unique_id: The unique identifier of the order you want to cancel.
        """
-    url = f"{BASE_API_URL}equity/orders/limit"
+    url = f"{BASE_API_URL}equity/orders/{id}"
 
     response = await make_t212_del(url)
     return response
