@@ -29,7 +29,7 @@ async def make_t212_req(url: str) -> dict[str, Any] | None:
 
     async with httpx.AsyncClient() as client: 
         try: 
-            res = await client.get(url, headers=headers, timeout=60.0)
+            res = await client.get(url, headers=headers, timeout=10.0)
             res.raise_for_status()
             return res.json()
         except Exception:
@@ -48,7 +48,7 @@ async def make_t212_post(url: str, payload: [str, Any]) -> dict[str, Any] | None
 
     async with httpx.AsyncClient() as client: 
         try: 
-            res = await client.post(url,json=payload, headers=headers, timeout=60.0)
+            res = await client.post(url,json=payload, headers=headers, timeout=10.0)
             res.raise_for_status()
             return res.json()
         except Exception:
@@ -66,7 +66,7 @@ async def make_t212_del(url: str) -> dict[str, Any] | None:
 
     async with httpx.AsyncClient() as client: 
         try: 
-            res = await client.delete(url,json=payload, headers=headers, timeout=60.0)
+            res = await client.delete(url, headers=headers, timeout=10.0)
             res.raise_for_status()
             return res.json()
         except Exception:
@@ -190,24 +190,25 @@ async def place_limit_order(limitPrice: float, quantity: float, ticker: str, cou
         return "Mission Failed"
 
 @mcp.tool()
-async def cancel_pending_order(unique_id: int) -> dict[str, Any] | None:
+async def cancel_pending_order(unique_id:int) -> dict[str, Any] | None:
     """Attempts to cancel a pending order by its unique ID a successful response indicates
        the cancellation request was accepted.
 
         Args: 
             unique_id: The unique identifier of the order you want to cancel.
        """
-    url = f"{BASE_API_URL}equity/orders/{id}"
+    url = f"{BASE_API_URL}equity/orders/{unique_id}"
 
     response = await make_t212_del(url)
-    return response
+    if response:
+        return {"status": "success", "detail": "Order cancelled"}
 
     if not response:
-        return "Mission Failed"
+        return {"status":"Mission Failed"}
 
 
 
 
 
 if __name__ == "__main__":
-    mcp.run(transport="http", port=8000)
+    mcp.run()
