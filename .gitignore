@@ -4,5 +4,7 @@ src/.venv
 src/.env
 src/__pycache__/
 src/*.pyc
+src/command
+src/stocks.db
 
 

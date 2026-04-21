@@ -11,12 +11,22 @@ import os
 import httpx
 import asyncio
 import sys
+import sqlite3
+import catalogue
+
+
+
 
 token        = os.getenv("T212_CREDS_DEMO")
-mcp          = FastMCP("T212 MCP Server")
+mcp          = FastMCP("Trading212 Account Management MCP Server",
+                       instructions="Provides tools for retrieving account data and managing stock portfolio. Start with get_account_summary() an overview.",
+                       version="1.0.0",
+                       )
+                      
 BASE_API_URL = 'https://demo.trading212.com/api/v0/'
 
-# Helper function to make requests to the T212 api
+# Tools
+# Helper functions to make requests to the T212 api
 async def make_t212_req(url: str) -> dict[str, Any] | None:
     """Make a get request to the trading212 API with error handling"""
 
@@ -54,6 +64,7 @@ async def make_t212_post(url: str, payload: [str, Any]) -> dict[str, Any] | None
         except Exception:
             return None
 
+
 async def make_t212_del(url: str) -> dict[str, Any] | None:
     """Make a delete request to the trading212 API with error handling"""
 
@@ -72,11 +83,15 @@ async def make_t212_del(url: str) -> dict[str, Any] | None:
         except Exception:
             return None
 
-
-
-@mcp.tool()
+@mcp.tool(
+    name        = "get_account_summary",
+    description = "request a breakdown of your account cash and investment metrics.",
+    tags        = {"account","summary"}
+)
 async def get_account_summary() -> dict[str, Any] | None:
-    """Get Account Summary"""
+    """Provides a breakdown of the user's cash and investements metrics,
+       such as available funds, inested capital and total account value."""
+
     url = f"{BASE_API_URL}equity/account/summary"
     response = await make_t212_req(url)
     return response
@@ -84,7 +99,11 @@ async def get_account_summary() -> dict[str, Any] | None:
     if not response:
         return "Mission Failed"
 
-@mcp.tool()
+@mcp.tool(
+    name        = "get_all_exchanges",
+    description = "request a list of all available exchanges.",
+    tags        = {"catalogue","search"}
+)
 async def get_exchanges(limit: int | None) -> dict[str, Any] | None:
     """Get All Exchanges"""
 
@@ -95,17 +114,33 @@ async def get_exchanges(limit: int | None) -> dict[str, Any] | None:
     if not response:
         return "Mission Failed"
 
-@mcp.tool()
-async def get_all_instruments() -> str:
-    """Get All Instruments"""
-    url = f"{BASE_API_URL}equity/metadata/instruments"
-    response = await make_t212_req(url)
-    return response
+@mcp.tool(
+    name        = "get_instrument",
+    description = "Use a company name to search for an it's ticker symbols.",
+    tags        = {"catalogue","search"}
+)
+async def get_instrument(company_name: str) -> Any | None:
+    """Queries the database using the company name and gets the company ticker. 
+    Used in conjunction with placing orders."""
+    # Open a connection
+    connection = sqlite3.connect('stocks.db')
 
-    if not response:
-        return "Mission Failed"
+    # create a cursor
+    cursor = connection.cursor()
 
-@mcp.tool()
+    res = cursor.execute(f"SELECT company_name, company_ticker FROM stocks WHERE company_name = '{company_name.lower()}'")
+    rows = res.fetchall()
+    print(rows)
+    return rows
+    connection.close()
+
+
+@mcp.tool(
+    name        = "get_all_transactions",
+    description = "Use a company name to search for an it's ticker symbols.",
+    tags        = {"account","transactions"}
+)
+
 async def get_all_transactions() -> str:
     """Get All Transactions"""
     url = f"{BASE_API_URL}equity/history/transactions"
@@ -116,8 +151,12 @@ async def get_all_transactions() -> str:
         return "Mission Failed"
 
 
+@mcp.tool(
+    name        = "get_open_positions",
+    description = "Return a list of all open positions",
+    tags        = {"account","open_positions"}
+)
 
-@mcp.tool()
 async def get_open_positions(ticker: str, country_code: str) -> dict[str, Any] | None:
     """Get all open positions
       This function takes two optional strings, ticker and country_code
@@ -143,7 +182,12 @@ async def get_open_positions(ticker: str, country_code: str) -> dict[str, Any] |
         return "Mission Failed"
 
 
-@mcp.tool()
+@mcp.tool(
+    name        = "get_open_orders",
+    description = "Get all open orders",
+    tags        = {"account","open_orders"}
+)
+
 async def get_all_pending_orders() -> list[dict[str, Any]] | None:
     """Retrieves a list of all orders that are currently active.
        Useful for monitoring the status of open positions
@@ -155,7 +199,12 @@ async def get_all_pending_orders() -> list[dict[str, Any]] | None:
     if not response:
         return "Mission Failed"
 
-@mcp.tool()
+@mcp.tool(
+    name        = "place_limit_order",
+    description = "Place a limit order",
+    tags        = {"account","place_limit_order"}
+)
+
 async def place_limit_order(limitPrice: float, quantity: float, ticker: str, country_code: str | None, timeValidity: str) -> dict[str, Any] | None:
     """Create a new limit order which executes at a specified price or better.
        
@@ -189,7 +238,12 @@ async def place_limit_order(limitPrice: float, quantity: float, ticker: str, cou
     if not response:
         return "Mission Failed"
 
-@mcp.tool()
+@mcp.tool(
+    name        = "cancel_pending_order",
+    description = "Cancel a pending open order",
+    tags        = {"account","cancel_pending_order"}
+)
+
 async def cancel_pending_order(unique_id:int) -> dict[str, Any] | None:
     """Attempts to cancel a pending order by its unique ID a successful response indicates
        the cancellation request was accepted.
@@ -207,8 +261,10 @@ async def cancel_pending_order(unique_id:int) -> dict[str, Any] | None:
         return {"status":"Mission Failed"}
 
 
-
-
-
 if __name__ == "__main__":
-    mcp.run()
+    catalogue.populate_db()
+    mcp.run(
+        host      = "0.0.0.0",
+        port      = 42070,
+        transport = "http"    
+    )

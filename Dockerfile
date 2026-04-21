@@ -13,9 +13,10 @@ WORKDIR /app
 # Install deps
 RUN uv sync --locked
 
-# Point the system to the virtual environment created by uv
-#ENV PATH="/home/app/.venv/bin:$PATH"
+# Initialize db
+RUN python setup_db.py
 
 EXPOSE 42070
 
-CMD ["uv","run","fastmcp", "run", "main.py:mcp", "--transport", "http", "--host", "0.0.0.0", "--port", "42070"]
+
+CMD ["uv", "run", "main.py"]

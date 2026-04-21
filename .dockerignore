@@ -9,6 +9,7 @@ src/*$py.class
 src/.pytest_cache/
 src/.venv/
 src/.env
+src/stocks.db
 
 # uv-specific
 src/.uv/
